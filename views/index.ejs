@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-it - Application Sociale</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header id="header">
+        <div class="header-left">
+            <% if (userId) { %>
+                <button id="add-note-btn" class="btn-add-note">+ Add Note</button>
+            <% } %>
+        </div>
+        <h1>Post-it Social</h1>
+        <nav id="auth-nav">
+            <% if (userId) { %>
+                <span class="welcome-msg">Welcome back, <%= username %>!</span>
+                <button id="logout-btn" class="btn btn-logout">Logout</button>
+            <% } else { %>
+                <button id="login-btn" class="btn btn-login">Login</button>
+                <button id="signup-btn" class="btn btn-signup">Sign Up</button>
+            <% } %>
+        </nav>
+    </header>
+
+    <!-- SVG for drawing connection lines -->
+    <svg id="connections-canvas" class="connections-canvas"></svg>
+
+    <div id="postits-container" class="scroll-container"></div>
+
+    <!-- Modal pour créer un post-it -->
+    <div id="create-modal" class="modal hidden">
+        <div class="modal-content note-modal">
+            <h2>Create a New Note</h2>
+            <textarea id="postit-text" placeholder="Write your note here..." maxlength="500"></textarea>
+            <div class="modal-buttons">
+                <button id="save-postit-btn" class="btn btn-success">Create</button>
+                <button id="cancel-postit-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour login/signup -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content auth-modal-content">
+            <h2 id="auth-title">Login</h2>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <input type="text" id="login-username" placeholder="Username" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;">Login</button>
+                <p style="text-align: center; margin-top: 10px; font-size: 14px;">
+                    No account? <button id="switch-to-signup" class="link-btn">Sign Up</button>
+                </p>
+            </div>
+
+            <!-- Signup Form (hidden by default) -->
+            <div id="signup-form" class="auth-form hidden">
+                <input type="text" id="signup-username" placeholder="Username" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <input type="password" id="signup-password-confirm" placeholder="Confirm Password" required>
+                <button id="signup-submit-btn" class="btn btn-primary" style="width: 100%;">Sign Up</button>
+                <p style="text-align: center; margin-top: 10px; font-size: 14px;">
+                    Already have an account? <button id="switch-to-login" class="link-btn">Login</button>
+                </p>
+            </div>
+
+            <button id="close-auth-modal-btn" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Close</button>
+        </div>
+    </div>
+
+    <script src="/client.js"></script>
+</body>
+</html>

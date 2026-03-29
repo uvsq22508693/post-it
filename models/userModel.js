@@ -1,49 +1,47 @@
-const db = require('../config/database');
+const { run, get, all } = require('../config/database');
 const bcrypt = require('bcrypt');
 
 class UserModel {
-    // Créer un utilisateur
+    // Create user
     static async create(username, password, role = 'user') {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const [result] = await db.query(
+        const result = await run(
             'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
             [username, hashedPassword, role]
         );
-        return result.insertId;
+        return result.lastID;
     }
-    
-    // Trouver un utilisateur par username
+
+    // Find user by username
     static async findByUsername(username) {
-        const [rows] = await db.query(
+        return await get(
             'SELECT * FROM users WHERE username = ?',
             [username]
         );
-        return rows[0];
     }
-    
-    // Trouver par ID
+
+    // Find by ID
     static async findById(id) {
-        const [rows] = await db.query(
+        return await get(
             'SELECT id, username, role FROM users WHERE id = ?',
             [id]
         );
-        return rows[0];
     }
-    
-    // Vérifier mot de passe
+
+    // Verify password
     static async verifyPassword(username, password) {
         const user = await this.findByUsername(username);
         if (!user) return null;
-        
+
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return null;
-        
+
         return user;
     }
-    
-    // Bonus : mettre à jour le rôle
+
+    // Update role
     static async updateRole(userId, newRole) {
-        await db.query(
+        await run(
             'UPDATE users SET role = ? WHERE id = ?',
             [newRole, userId]
         );

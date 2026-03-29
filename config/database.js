@@ -1,18 +1,44 @@
-const mysql = require('mysql2');
-const dotenv = require('dotenv');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
-dotenv.config();
+// Create or open SQLite database
+const db = new sqlite3.Database(
+    path.join(__dirname, '../postit.db'),
+    (err) => {
+        if (err) {
+            console.error('Error opening database:', err);
+        } else {
+            console.log('✅ SQLite database connected');
+        }
+    }
+);
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+// Promisify database methods
+const run = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function(err) {
+            if (err) reject(err);
+            else resolve({ lastID: this.lastID, changes: this.changes });
+        });
+    });
+};
 
-const promisePool = pool.promise();
+const get = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => {
+            if (err) reject(err);
+            else resolve(row);
+        });
+    });
+};
 
-module.exports = promisePool;
+const all = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+};
+
+module.exports = { db, run, get, all };

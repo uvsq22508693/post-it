@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/pic', express.static(path.join(__dirname, 'pic')));
 
 // Session
 app.use(session({
@@ -33,9 +34,11 @@ app.set('views', path.join(__dirname, 'views'));
 // Routes
 const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
+const connectionsRoutes = require('./routes/connections');
 
 app.use('/', authRoutes);
 app.use('/', postsRoutes);
+app.use('/connections', connectionsRoutes);
 
 // Route principale
 app.get('/', (req, res) => {

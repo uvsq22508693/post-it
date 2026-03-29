@@ -1,35 +1,48 @@
-const db = require('../config/database');
+const { db, run } = require('../config/database');
 
 async function initDB() {
     try {
-        // Table utilisateurs
-        await db.query(`
+        // Create users table
+        await run(`
             CREATE TABLE IF NOT EXISTS users (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                role ENUM('user', 'admin') DEFAULT 'user',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        
-        // Table postits
-        await db.query(`
+
+        // Create postits table
+        await run(`
             CREATE TABLE IF NOT EXISTS postits (
-                id INT PRIMARY KEY AUTO_INCREMENT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 text TEXT NOT NULL,
-                x INT NOT NULL,
-                y INT NOT NULL,
-                user_id INT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                x INTEGER NOT NULL,
+                y INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         `);
-        
-        console.log('✅ Base de données initialisée');
+
+        // Create connections table
+        await run(`
+            CREATE TABLE IF NOT EXISTS connections (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                from_post_id INTEGER NOT NULL,
+                to_post_id INTEGER NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (from_post_id) REFERENCES postits(id) ON DELETE CASCADE,
+                FOREIGN KEY (to_post_id) REFERENCES postits(id) ON DELETE CASCADE,
+                UNIQUE(from_post_id, to_post_id)
+            )
+        `);
+
+        console.log('✅ Database initialized');
     } catch (error) {
-        console.error('❌ Erreur initialisation BDD:', error);
+        console.error('❌ Database initialization error:', error);
     }
 }
 
