@@ -834,6 +834,8 @@ async function handleLogout() {
 // Open auth modal
 function openAuthModal() {
     document.getElementById('auth-modal').classList.remove('hidden');
+    document.getElementById('login-form').classList.remove('hidden');
+    document.getElementById('signup-form').classList.add('hidden');
 }
 
 // Setup all event listeners
@@ -935,6 +937,7 @@ function setupEventListeners() {
     if (switchToSignupBtn) {
         switchToSignupBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('signup-form').classList.remove('hidden');
         });
@@ -944,6 +947,7 @@ function setupEventListeners() {
     if (switchToLoginBtn) {
         switchToLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             document.getElementById('signup-form').classList.add('hidden');
             document.getElementById('login-form').classList.remove('hidden');
         });
