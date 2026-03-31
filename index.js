@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const helmet = require('helmet');
 const path = require('path');
 const dotenv = require('dotenv');
 const { initDB } = require('./models/db');
@@ -9,6 +10,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 🔒 Headers de sécurité avec Helmet
+app.use(helmet());
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,7 +21,7 @@ app.use('/pic', express.static(path.join(__dirname, 'pic')));
 
 // Session
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this', // À changer en production!
     resave: false,
     saveUninitialized: false,
     cookie: { 
