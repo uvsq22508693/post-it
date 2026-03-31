@@ -46,8 +46,8 @@ app.use('/connections', connectionsRoutes);
 
 // Route principale
 app.get('/', (req, res) => {
-    // Si tu utilises EJS, passe les infos de session
-    res.render('index', {
+    // Si tu utilises Nunjucks, passe les infos de session
+    res.render('index.njk', {
         userId: req.session.userId,
         username: req.session.username,
         role: req.session.role

@@ -1,9 +1,9 @@
 const UserModel = require('../models/userModel');
 
 class AuthController {
-    // Afficher page login/signup (si tu utilises EJS)
+    // Afficher page login/signup (Nunjucks)
     static showLoginPage(req, res) {
-        res.render('login');
+        res.render('login.njk');
     }
     
     // Traitement inscription
