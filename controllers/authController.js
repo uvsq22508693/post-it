@@ -3,7 +3,7 @@ const UserModel = require('../models/userModel');
 class AuthController {
     // Afficher page login/signup (Nunjucks)
     static showLoginPage(req, res) {
-        res.render('login.njk');
+        res.renderView('login');
     }
     
     // Traitement inscription

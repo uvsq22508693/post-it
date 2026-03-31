@@ -29,11 +29,32 @@ app.use(session({
 
 // Set view engine (Nunjucks)
 const nunjucks = require('nunjucks');
-nunjucks.configure(path.join(__dirname, 'views'), {
+const viewsPath = path.join(__dirname, 'views');
+
+// Configure Nunjucks environment
+const env = nunjucks.configure(viewsPath, {
     autoescape: true,
-    express: app
+    noCache: true,
+    watch: false
 });
-app.set('view engine', 'njk');
+
+// Helper function to render templates directly
+function renderView(res, viewName, data = {}) {
+    const filePath = path.join(viewsPath, viewName + '.njk');
+    env.render(filePath, data, (err, html) => {
+        if (err) {
+            console.error('Template error:', err);
+            return res.status(500).send('Error: ' + err.message);
+        }
+        res.send(html);
+    });
+}
+
+// Middleware to add renderView to response object
+app.use((req, res, next) => {
+    res.renderView = renderView.bind(null, res);
+    next();
+});
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -46,8 +67,7 @@ app.use('/connections', connectionsRoutes);
 
 // Route principale
 app.get('/', (req, res) => {
-    // Si tu utilises Nunjucks, passe les infos de session
-    res.render('index.njk', {
+    renderView(res, 'index', {
         userId: req.session.userId,
         username: req.session.username,
         role: req.session.role
