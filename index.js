@@ -27,9 +27,13 @@ app.use(session({
     }
 }));
 
-// Set view engine (si tu utilises EJS)
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// Set view engine (Nunjucks)
+const nunjucks = require('nunjucks');
+nunjucks.configure(path.join(__dirname, 'views'), {
+    autoescape: true,
+    express: app
+});
+app.set('view engine', 'njk');
 
 // Routes
 const authRoutes = require('./routes/auth');
