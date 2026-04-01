@@ -16,10 +16,10 @@
             <form id="login-form" class="auth-form">
                 <input type="text" id="login-username" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="login-password" placeholder="Mot de passe" required>
+                <!-- Message d'erreur login -->
+                <div id="login-error" style="background-color: #ffebee; color: #d32f2f; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: none; font-weight: bold; text-align: center;"></div>
                 <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%;">Se connecter</button>
             </form>
-            <!-- Message d'erreur login -->
-            <div id="login-error" style="color: #d32f2f; margin-top: 10px; text-align: center; display: none; font-weight: bold;"></div>
             <p style="text-align: center; margin-top: 15px;">
                 Pas encore de compte? <a href="#" id="switch-to-signup-link" class="link">S'inscrire ici</a>
             </p>
@@ -32,19 +32,19 @@
                 <input type="text" id="signup-username" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="signup-password" placeholder="Mot de passe" required>
                 <input type="password" id="signup-password-confirm" placeholder="Confirmer mot de passe" required>
+                <!-- Affichage des exigences du password -->
+                <div id="password-requirements" style="margin-top: 15px; font-size: 12px; color: #666; margin-bottom: 15px;">
+                    <p style="font-weight: bold; margin-bottom: 8px;">Exigences du mot de passe:</p>
+                    <div id="req-length" style="margin: 3px 0; color: #999;">❌ Au moins 8 caractères</div>
+                    <div id="req-upper" style="margin: 3px 0; color: #999;">❌ Une majuscule (A-Z)</div>
+                    <div id="req-lower" style="margin: 3px 0; color: #999;">❌ Une minuscule (a-z)</div>
+                    <div id="req-number" style="margin: 3px 0; color: #999;">❌ Un chiffre (0-9)</div>
+                    <div id="req-special" style="margin: 3px 0; color: #999;">❌ Un caractère spécial (!@#$%^&*)</div>
+                </div>
+                <!-- Message d'erreur signup -->
+                <div id="signup-error" style="background-color: #ffebee; color: #d32f2f; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: none; font-weight: bold; text-align: center;"></div>
                 <button type="submit" class="btn btn-success" style="width: 100%;">S'inscrire</button>
             </form>
-            <!-- Affichage des exigences du password -->
-            <div id="password-requirements" style="margin-top: 15px; font-size: 12px; color: #666;">
-                <p style="font-weight: bold; margin-bottom: 8px;">Exigences du mot de passe:</p>
-                <div id="req-length" style="margin: 3px 0; color: #999;">❌ Au moins 8 caractères</div>
-                <div id="req-upper" style="margin: 3px 0; color: #999;">❌ Une majuscule (A-Z)</div>
-                <div id="req-lower" style="margin: 3px 0; color: #999;">❌ Une minuscule (a-z)</div>
-                <div id="req-number" style="margin: 3px 0; color: #999;">❌ Un chiffre (0-9)</div>
-                <div id="req-special" style="margin: 3px 0; color: #999;">❌ Un caractère spécial (!@#$%^&*)</div>
-            </div>
-            <!-- Message d'erreur signup -->
-            <div id="signup-error" style="color: #d32f2f; margin-top: 10px; text-align: center; display: none; font-weight: bold;"></div>
             <p style="text-align: center; margin-top: 15px;">
                 Déjà inscrit? <a href="#" id="switch-to-login-link" class="link">Se connecter ici</a>
             </p>
