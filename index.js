@@ -20,13 +20,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/pic', express.static(path.join(__dirname, 'pic')));
 
 // Session
+const isProduction = process.env.NODE_ENV === 'production';
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-this', // À changer en production!
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: false,  // Mettre à true si HTTPS
+        secure: isProduction,  // ✅ true en production, false en local
         httpOnly: true,
+        sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24 // 24h
     }
 }));
