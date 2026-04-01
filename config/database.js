@@ -23,7 +23,7 @@ const run = async (sql, params = []) => {
     try {
         const result = await pool.query(sql, params);
         return {
-            lastID: result.rows[0]?.id,
+            lastID: result.rows[0]?.id || null,  // ✅ PostgreSQL retourne dans rows avec RETURNING
             changes: result.rowCount
         };
     } catch (error) {

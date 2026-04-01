@@ -996,9 +996,13 @@ function setupEventListeners() {
 async function handleLoginSubmit() {
     const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
+    const errorDiv = document.getElementById('login-error');
 
     if (!username || !password) {
-        alert('Veuillez remplir tous les champs');
+        if (errorDiv) {
+            errorDiv.textContent = 'Veuillez remplir tous les champs';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
 
@@ -1012,11 +1016,18 @@ async function handleLoginSubmit() {
         if (response.ok) {
             window.location.href = '/';
         } else {
-            alert('Identifiants incorrects');
+            const data = await response.json();
+            if (errorDiv) {
+                errorDiv.textContent = data.error || 'Identifiants incorrects';
+                errorDiv.style.display = 'block';
+            }
         }
     } catch (error) {
         console.error('Error logging in:', error);
-        alert('Erreur de connexion');
+        if (errorDiv) {
+            errorDiv.textContent = 'Erreur de connexion';
+            errorDiv.style.display = 'block';
+        }
     }
 }
 
@@ -1025,19 +1036,29 @@ async function handleSignupSubmit() {
     const username = document.getElementById('signup-username').value.trim();
     const password = document.getElementById('signup-password').value;
     const passwordConfirm = document.getElementById('signup-password-confirm').value;
+    const errorDiv = document.getElementById('signup-error');
 
     if (!username || !password || !passwordConfirm) {
-        alert('Veuillez remplir tous les champs');
+        if (errorDiv) {
+            errorDiv.textContent = 'Veuillez remplir tous les champs';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
 
     if (password !== passwordConfirm) {
-        alert('Les mots de passe ne correspondent pas');
+        if (errorDiv) {
+            errorDiv.textContent = 'Les mots de passe ne correspondent pas';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
 
     if (password.length < 6) {
-        alert('Le mot de passe doit contenir au moins 6 caractères');
+        if (errorDiv) {
+            errorDiv.textContent = 'Le mot de passe doit contenir au moins 6 caractères';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
 
@@ -1052,11 +1073,17 @@ async function handleSignupSubmit() {
             window.location.href = '/';
         } else {
             const data = await response.json();
-            alert(data.error || 'Erreur lors de l\'inscription');
+            if (errorDiv) {
+                errorDiv.textContent = data.error || 'Erreur lors de l\'inscription';
+                errorDiv.style.display = 'block';
+            }
         }
     } catch (error) {
         console.error('Error signing up:', error);
-        alert('Erreur d\'inscription');
+        if (errorDiv) {
+            errorDiv.textContent = 'Erreur d\'inscription';
+            errorDiv.style.display = 'block';
+        }
     }
 }
 

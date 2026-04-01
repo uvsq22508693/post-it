@@ -9,6 +9,9 @@ class UserModel {
             'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING id',
             [username, hashedPassword, role]
         );
+        if (!result.lastID) {
+            throw new Error('Erreur lors de la création de l\'utilisateur');
+        }
         return result.lastID;
     }
 
