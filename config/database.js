@@ -1,44 +1,52 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Pool } = require('pg');
+require('dotenv').config();
 
-// Create or open SQLite database
-const db = new sqlite3.Database(
-    path.join(__dirname, '../postit.db'),
-    (err) => {
-        if (err) {
-            console.error('Error opening database:', err);
-        } else {
-            console.log('✅ SQLite database connected');
-        }
+// Create PostgreSQL connection pool
+const pool = new Pool({
+    user: process.env.DB_USER || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME || 'postit',
+    password: process.env.DB_PASSWORD || 'postgres',
+    port: process.env.DB_PORT || 5432,
+});
+
+pool.on('error', (err) => {
+    console.error('❌ Unexpected error on idle client', err);
+});
+
+pool.on('connect', () => {
+    console.log('✅ PostgreSQL database connected');
+});
+
+// Promisify query methods
+const run = async (sql, params = []) => {
+    try {
+        const result = await pool.query(sql, params);
+        return {
+            lastID: result.rows[0]?.id,
+            changes: result.rowCount
+        };
+    } catch (error) {
+        throw error;
     }
-);
-
-// Promisify database methods
-const run = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function(err) {
-            if (err) reject(err);
-            else resolve({ lastID: this.lastID, changes: this.changes });
-        });
-    });
 };
 
-const get = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
+const get = async (sql, params = []) => {
+    try {
+        const result = await pool.query(sql, params);
+        return result.rows[0] || null;
+    } catch (error) {
+        throw error;
+    }
 };
 
-const all = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+const all = async (sql, params = []) => {
+    try {
+        const result = await pool.query(sql, params);
+        return result.rows || [];
+    } catch (error) {
+        throw error;
+    }
 };
 
-module.exports = { db, run, get, all };
+module.exports = { pool, run, get, all };

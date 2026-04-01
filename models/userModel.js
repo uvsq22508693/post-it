@@ -6,7 +6,7 @@ class UserModel {
     static async create(username, password, role = 'user') {
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await run(
-            'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+            'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING id',
             [username, hashedPassword, role]
         );
         return result.lastID;
@@ -15,7 +15,7 @@ class UserModel {
     // Find user by username
     static async findByUsername(username) {
         return await get(
-            'SELECT * FROM users WHERE username = ?',
+            'SELECT * FROM users WHERE username = $1',
             [username]
         );
     }
@@ -23,7 +23,7 @@ class UserModel {
     // Find by ID
     static async findById(id) {
         return await get(
-            'SELECT id, username, role FROM users WHERE id = ?',
+            'SELECT id, username, role FROM users WHERE id = $1',
             [id]
         );
     }
@@ -42,7 +42,7 @@ class UserModel {
     // Update role
     static async updateRole(userId, newRole) {
         await run(
-            'UPDATE users SET role = ? WHERE id = ?',
+            'UPDATE users SET role = $1 WHERE id = $2',
             [newRole, userId]
         );
     }

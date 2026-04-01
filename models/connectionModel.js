@@ -1,4 +1,4 @@
-const { db, run, get, all } = require('../config/database');
+const { run, get, all } = require('../config/database');
 
 class ConnectionModel {
     // Get all connections
@@ -16,7 +16,7 @@ class ConnectionModel {
     static async create(fromPostId, toPostId) {
         try {
             const result = await run(
-                `INSERT INTO connections (from_post_id, to_post_id) VALUES (?, ?)`,
+                `INSERT INTO connections (from_post_id, to_post_id) VALUES ($1, $2) RETURNING id`,
                 [fromPostId, toPostId]
             );
             return result.lastID;
@@ -31,7 +31,7 @@ class ConnectionModel {
         try {
             // Delete in both directions
             await run(
-                `DELETE FROM connections WHERE (from_post_id = ? AND to_post_id = ?) OR (from_post_id = ? AND to_post_id = ?)`,
+                `DELETE FROM connections WHERE (from_post_id = $1 AND to_post_id = $2) OR (from_post_id = $3 AND to_post_id = $4)`,
                 [fromPostId, toPostId, toPostId, fromPostId]
             );
             return true;
@@ -45,7 +45,7 @@ class ConnectionModel {
     static async exists(postId1, postId2) {
         try {
             const connection = await get(
-                `SELECT id FROM connections WHERE (from_post_id = ? AND to_post_id = ?) OR (from_post_id = ? AND to_post_id = ?)`,
+                `SELECT id FROM connections WHERE (from_post_id = $1 AND to_post_id = $2) OR (from_post_id = $3 AND to_post_id = $4)`,
                 [postId1, postId2, postId2, postId1]
             );
             return !!connection;
