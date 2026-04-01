@@ -13,7 +13,7 @@ class PostModel {
     // Get all posts
     static async findAll() {
         return await all(`
-            SELECT p.*, u.username 
+            SELECT p.*, u.username, u.user_color
             FROM postits p 
             JOIN users u ON p.user_id = u.id 
             ORDER BY p.created_at DESC
@@ -23,7 +23,7 @@ class PostModel {
     // Get post by ID
     static async findById(id) {
         return await get(`
-            SELECT p.*, u.username 
+            SELECT p.*, u.username, u.user_color
             FROM postits p 
             JOIN users u ON p.user_id = u.id 
             WHERE p.id = ?

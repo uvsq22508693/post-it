@@ -8,10 +8,18 @@ async function initDB() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
+                user_color TEXT DEFAULT NULL,
                 role TEXT DEFAULT 'user',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // Add user_color column if it doesn't exist (migration for existing users)
+        try {
+            await run(`ALTER TABLE users ADD COLUMN user_color TEXT DEFAULT NULL`);
+        } catch (err) {
+            // Column already exists, ignore error
+        }
 
         // Create postits table
         await run(`

@@ -20,12 +20,16 @@ class AuthController {
             // Créer l'utilisateur
             const userId = await UserModel.create(username, password);
             
+            // Récupérer l'utilisateur avec sa couleur
+            const newUser = await UserModel.findById(userId);
+            
             // Connecter automatiquement
             req.session.userId = userId;
             req.session.username = username;
+            req.session.userColor = newUser.user_color;
             req.session.role = 'user';
             
-            res.status(201).json({ success: true });
+            res.status(201).json({ success: true, userColor: newUser.user_color });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Erreur lors de l\'inscription' });
@@ -44,9 +48,10 @@ class AuthController {
             
             req.session.userId = user.id;
             req.session.username = user.username;
+            req.session.userColor = user.user_color;
             req.session.role = user.role;
             
-            res.json({ success: true });
+            res.json({ success: true, userColor: user.user_color });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Erreur lors de la connexion' });

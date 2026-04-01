@@ -8,8 +8,14 @@ let selectedY = null;
 let connections = []; // Store node connections
 let selectedPostForConnection = null; // Track which note is selected for connection
 
-// User color assignment
-const USER_COLORS = ['user-color-0', 'user-color-1', 'user-color-2', 'user-color-3', 'user-color-4', 'user-color-5', 'user-color-6', 'user-color-7', 'user-color-8', 'user-color-9', 'user-color-10', 'user-color-11'];
+// User color assignment (expanded palette - 20 colors)
+const USER_COLORS = [
+    'user-color-0', 'user-color-1', 'user-color-2', 'user-color-3', 
+    'user-color-4', 'user-color-5', 'user-color-6', 'user-color-7', 
+    'user-color-8', 'user-color-9', 'user-color-10', 'user-color-11',
+    'user-color-12', 'user-color-13', 'user-color-14', 'user-color-15',
+    'user-color-16', 'user-color-17', 'user-color-18', 'user-color-19'
+];
 
 // Canvas panning variables
 let isPanning = false;
@@ -25,8 +31,15 @@ function getRandomColor() {
     return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-// Hash username to get consistent user color
-function getUserColor(username) {
+// Get user color (from database or fallback to hash)
+function getUserColor(post) {
+    // If the post has a stored user_color, use it
+    if (post.user_color) {
+        return post.user_color;
+    }
+    
+    // Fallback: hash username for color (for backward compatibility)
+    const username = post.username || '';
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
         const char = username.charCodeAt(i);
@@ -176,8 +189,8 @@ function createPostElement(post) {
     postElement.className = 'postit';
     postElement.setAttribute('data-postit-id', post.id);
     
-    // Add user-specific color based on username hash
-    const userColor = getUserColor(post.username);
+    // Add user-specific color based on stored user_color
+    const userColor = getUserColor(post);
     postElement.classList.add(userColor);
     
     // Check if this postit belongs to current user
