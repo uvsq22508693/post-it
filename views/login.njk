@@ -16,8 +16,10 @@
             <form id="login-form" class="auth-form">
                 <input type="text" id="login-username" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="login-password" placeholder="Mot de passe" required>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Se connecter</button>
+                <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%;">Se connecter</button>
             </form>
+            <!-- Message d'erreur login -->
+            <div id="login-error" style="color: #d32f2f; margin-top: 10px; text-align: center; display: none; font-weight: bold;"></div>
             <p style="text-align: center; margin-top: 15px;">
                 Pas encore de compte? <a href="#" id="switch-to-signup-link" class="link">S'inscrire ici</a>
             </p>
@@ -32,6 +34,17 @@
                 <input type="password" id="signup-password-confirm" placeholder="Confirmer mot de passe" required>
                 <button type="submit" class="btn btn-success" style="width: 100%;">S'inscrire</button>
             </form>
+            <!-- Affichage des exigences du password -->
+            <div id="password-requirements" style="margin-top: 15px; font-size: 12px; color: #666;">
+                <p style="font-weight: bold; margin-bottom: 8px;">Exigences du mot de passe:</p>
+                <div id="req-length" style="margin: 3px 0; color: #999;">❌ Au moins 8 caractères</div>
+                <div id="req-upper" style="margin: 3px 0; color: #999;">❌ Une majuscule (A-Z)</div>
+                <div id="req-lower" style="margin: 3px 0; color: #999;">❌ Une minuscule (a-z)</div>
+                <div id="req-number" style="margin: 3px 0; color: #999;">❌ Un chiffre (0-9)</div>
+                <div id="req-special" style="margin: 3px 0; color: #999;">❌ Un caractère spécial (!@#$%^&*)</div>
+            </div>
+            <!-- Message d'erreur signup -->
+            <div id="signup-error" style="color: #d32f2f; margin-top: 10px; text-align: center; display: none; font-weight: bold;"></div>
             <p style="text-align: center; margin-top: 15px;">
                 Déjà inscrit? <a href="#" id="switch-to-login-link" class="link">Se connecter ici</a>
             </p>
@@ -39,24 +52,69 @@
     </div>
 
     <script>
+        let loginBlockedUntil = null; // Tracker pour le blocage login
+
+        // Vérifier les exigences du password en temps réel
+        document.getElementById('signup-password').addEventListener('input', (e) => {
+            const password = e.target.value;
+            
+            // Longueur
+            const hasLength = password.length >= 8;
+            document.getElementById('req-length').style.color = hasLength ? '#4caf50' : '#999';
+            document.getElementById('req-length').textContent = hasLength ? '✅ Au moins 8 caractères' : '❌ Au moins 8 caractères';
+            
+            // Majuscule
+            const hasUpper = /[A-Z]/.test(password);
+            document.getElementById('req-upper').style.color = hasUpper ? '#4caf50' : '#999';
+            document.getElementById('req-upper').textContent = hasUpper ? '✅ Une majuscule (A-Z)' : '❌ Une majuscule (A-Z)';
+            
+            // Minuscule
+            const hasLower = /[a-z]/.test(password);
+            document.getElementById('req-lower').style.color = hasLower ? '#4caf50' : '#999';
+            document.getElementById('req-lower').textContent = hasLower ? '✅ Une minuscule (a-z)' : '❌ Une minuscule (a-z)';
+            
+            // Chiffre
+            const hasNumber = /[0-9]/.test(password);
+            document.getElementById('req-number').style.color = hasNumber ? '#4caf50' : '#999';
+            document.getElementById('req-number').textContent = hasNumber ? '✅ Un chiffre (0-9)' : '❌ Un chiffre (0-9)';
+            
+            // Caractère spécial
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            document.getElementById('req-special').style.color = hasSpecial ? '#4caf50' : '#999';
+            document.getElementById('req-special').textContent = hasSpecial ? '✅ Un caractère spécial (!@#$%^&*)' : '❌ Un caractère spécial (!@#$%^&*)';
+        });
+
         // Switch between login and signup forms
         document.getElementById('switch-to-signup-link').addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('signup-section').classList.remove('hidden');
+            document.getElementById('login-error').style.display = 'none'; // Reset error message
         });
 
         document.getElementById('switch-to-login-link').addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('signup-section').classList.add('hidden');
             document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('signup-error').style.display = 'none'; // Reset error message
         });
 
         // Handle login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Vérifier si l'utilisateur est bloqué
+            if (loginBlockedUntil && Date.now() < loginBlockedUntil) {
+                const remainingSeconds = Math.ceil((loginBlockedUntil - Date.now()) / 1000);
+                document.getElementById('login-error').textContent = `🔒 Trop de tentatives. Réessayez dans ${remainingSeconds}s`;
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('login-btn').disabled = true;
+                return;
+            }
+
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
+            document.getElementById('login-error').style.display = 'none';
 
             try {
                 const response = await fetch('/login', {
@@ -68,11 +126,36 @@
                 if (response.ok) {
                     window.location.href = '/';
                 } else {
-                    alert('Identifiants incorrects');
+                    const data = await response.json();
+                    
+                    // Vérifier si c'est un message de rate limiting
+                    if (response.status === 429 || data.error.includes('Trop de tentatives')) {
+                        loginBlockedUntil = Date.now() + 30000; // 30 secondes
+                        document.getElementById('login-btn').disabled = true;
+                        
+                        // Timer countdown
+                        const timer = setInterval(() => {
+                            const remaining = Math.ceil((loginBlockedUntil - Date.now()) / 1000);
+                            if (remaining > 0) {
+                                document.getElementById('login-error').textContent = `🔒 Trop de tentatives. Réessayez dans ${remaining}s`;
+                            } else {
+                                clearInterval(timer);
+                                loginBlockedUntil = null;
+                                document.getElementById('login-error').style.display = 'none';
+                                document.getElementById('login-btn').disabled = false;
+                            }
+                        }, 1000);
+                        // Afficher le message immédiatement
+                        document.getElementById('login-error').textContent = `🔒 ${data.error}`;
+                    } else {
+                        document.getElementById('login-error').textContent = data.error || 'Identifiants incorrects';
+                    }
+                    document.getElementById('login-error').style.display = 'block';
                 }
             } catch (error) {
                 console.error(error);
-                alert('Erreur de connexion');
+                document.getElementById('login-error').textContent = 'Erreur de connexion';
+                document.getElementById('login-error').style.display = 'block';
             }
         });
 
@@ -82,14 +165,11 @@
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById('signup-password').value;
             const passwordConfirm = document.getElementById('signup-password-confirm').value;
+            document.getElementById('signup-error').style.display = 'none';
 
             if (password !== passwordConfirm) {
-                alert('Les mots de passe ne correspondent pas');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('Le mot de passe doit contenir au moins 6 caractères');
+                document.getElementById('signup-error').textContent = '❌ Les mots de passe ne correspondent pas';
+                document.getElementById('signup-error').style.display = 'block';
                 return;
             }
 
@@ -104,11 +184,19 @@
                     window.location.href = '/';
                 } else {
                     const data = await response.json();
-                    alert(data.error || 'Erreur lors de l\'inscription');
+                    
+                    // Afficher les erreurs détaillées du password
+                    if (data.details && Array.isArray(data.details)) {
+                        document.getElementById('signup-error').textContent = '❌ ' + data.details.join(', ');
+                    } else {
+                        document.getElementById('signup-error').textContent = data.error || 'Erreur lors de l\'inscription';
+                    }
+                    document.getElementById('signup-error').style.display = 'block';
                 }
             } catch (error) {
                 console.error(error);
-                alert('Erreur d\'inscription');
+                document.getElementById('signup-error').textContent = 'Erreur d\'inscription';
+                document.getElementById('signup-error').style.display = 'block';
             }
         });
     </script>
