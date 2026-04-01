@@ -53,10 +53,12 @@
 
     <script>
         let loginBlockedUntil = null; // Tracker pour le blocage login
+        let loginAttempts = 0; // Compter les tentatives
 
         // Vérifier les exigences du password en temps réel
         document.getElementById('signup-password').addEventListener('input', (e) => {
             const password = e.target.value;
+            document.getElementById('signup-error').style.display = 'none'; // Masquer les erreurs
             
             // Longueur
             const hasLength = password.length >= 8;
@@ -128,29 +130,36 @@
                 } else {
                     const data = await response.json();
                     
-                    // Vérifier si c'est un message de rate limiting
-                    if (response.status === 429 || data.error.includes('Trop de tentatives')) {
+                    // Vérifier si c'est un message de rate limiting (429 ou message contient "Trop")
+                    if (response.status === 429 || (data.error && data.error.includes('Trop'))) {
                         loginBlockedUntil = Date.now() + 30000; // 30 secondes
                         document.getElementById('login-btn').disabled = true;
+                        document.getElementById('login-error').textContent = `🔒 ${data.error}`;
+                        document.getElementById('login-error').style.display = 'block';
                         
                         // Timer countdown
                         const timer = setInterval(() => {
+                            if (!loginBlockedUntil) {
+                                clearInterval(timer);
+                                return;
+                            }
                             const remaining = Math.ceil((loginBlockedUntil - Date.now()) / 1000);
                             if (remaining > 0) {
                                 document.getElementById('login-error').textContent = `🔒 Trop de tentatives. Réessayez dans ${remaining}s`;
+                                document.getElementById('login-error').style.display = 'block';
                             } else {
                                 clearInterval(timer);
                                 loginBlockedUntil = null;
                                 document.getElementById('login-error').style.display = 'none';
+                                document.getElementById('login-error').textContent = '';
                                 document.getElementById('login-btn').disabled = false;
                             }
                         }, 1000);
-                        // Afficher le message immédiatement
-                        document.getElementById('login-error').textContent = `🔒 ${data.error}`;
                     } else {
+                        // Erreur d'identifiants
                         document.getElementById('login-error').textContent = data.error || 'Identifiants incorrects';
+                        document.getElementById('login-error').style.display = 'block';
                     }
-                    document.getElementById('login-error').style.display = 'block';
                 }
             } catch (error) {
                 console.error(error);
@@ -165,7 +174,6 @@
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById('signup-password').value;
             const passwordConfirm = document.getElementById('signup-password-confirm').value;
-            document.getElementById('signup-error').style.display = 'none';
 
             if (password !== passwordConfirm) {
                 document.getElementById('signup-error').textContent = '❌ Les mots de passe ne correspondent pas';
@@ -185,12 +193,8 @@
                 } else {
                     const data = await response.json();
                     
-                    // Afficher les erreurs détaillées du password
-                    if (data.details && Array.isArray(data.details)) {
-                        document.getElementById('signup-error').textContent = '❌ ' + data.details.join(', ');
-                    } else {
-                        document.getElementById('signup-error').textContent = data.error || 'Erreur lors de l\'inscription';
-                    }
+                    // Afficher uniquement dans la zone d'erreur, pas dans le checklist
+                    document.getElementById('signup-error').textContent = data.error || 'Erreur lors de l\'inscription';
                     document.getElementById('signup-error').style.display = 'block';
                 }
             } catch (error) {
