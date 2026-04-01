@@ -104,6 +104,7 @@
         // Handle login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Login form submitted');
             
             // Vérifier si l'utilisateur est bloqué
             if (loginBlockedUntil && Date.now() < loginBlockedUntil) {
@@ -111,12 +112,13 @@
                 document.getElementById('login-error').textContent = `🔒 Trop de tentatives. Réessayez dans ${remainingSeconds}s`;
                 document.getElementById('login-error').style.display = 'block';
                 document.getElementById('login-btn').disabled = true;
+                console.log('User is blocked');
                 return;
             }
 
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
-            document.getElementById('login-error').style.display = 'none';
+            console.log('Attempting login for:', username);
 
             try {
                 const response = await fetch('/login', {
@@ -125,13 +127,17 @@
                     body: JSON.stringify({ username, password })
                 });
 
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
                 if (response.ok) {
+                    console.log('Login successful');
                     window.location.href = '/';
                 } else {
-                    const data = await response.json();
-                    
                     // Vérifier si c'est un message de rate limiting (429 ou message contient "Trop")
                     if (response.status === 429 || (data.error && data.error.includes('Trop'))) {
+                        console.log('Rate limit triggered');
                         loginBlockedUntil = Date.now() + 30000; // 30 secondes
                         document.getElementById('login-btn').disabled = true;
                         document.getElementById('login-error').textContent = `🔒 ${data.error}`;
@@ -157,12 +163,13 @@
                         }, 1000);
                     } else {
                         // Erreur d'identifiants
+                        console.log('Login error - incorrect credentials');
                         document.getElementById('login-error').textContent = data.error || 'Identifiants incorrects';
                         document.getElementById('login-error').style.display = 'block';
                     }
                 }
             } catch (error) {
-                console.error(error);
+                console.error('Fetch error:', error);
                 document.getElementById('login-error').textContent = 'Erreur de connexion';
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -171,34 +178,42 @@
         // Handle signup
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Signup form submitted');
+            
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById('signup-password').value;
             const passwordConfirm = document.getElementById('signup-password-confirm').value;
 
             if (password !== passwordConfirm) {
+                console.log('Passwords do not match');
                 document.getElementById('signup-error').textContent = '❌ Les mots de passe ne correspondent pas';
                 document.getElementById('signup-error').style.display = 'block';
                 return;
             }
 
             try {
+                console.log('Sending signup request for:', username);
                 const response = await fetch('/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
 
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
                 if (response.ok) {
+                    console.log('Signup successful');
                     window.location.href = '/';
                 } else {
-                    const data = await response.json();
-                    
                     // Afficher uniquement dans la zone d'erreur, pas dans le checklist
+                    console.log('Signup error:', data.error);
                     document.getElementById('signup-error').textContent = data.error || 'Erreur lors de l\'inscription';
                     document.getElementById('signup-error').style.display = 'block';
                 }
             } catch (error) {
-                console.error(error);
+                console.error('Fetch error:', error);
                 document.getElementById('signup-error').textContent = 'Erreur d\'inscription';
                 document.getElementById('signup-error').style.display = 'block';
             }

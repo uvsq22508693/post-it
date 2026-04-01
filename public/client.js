@@ -972,6 +972,40 @@ function setupEventListeners() {
         signupSubmitBtn.addEventListener('click', handleSignupSubmit);
     }
 
+    // Signup password requirements tracking
+    const signupPasswordField = document.getElementById('signup-password');
+    if (signupPasswordField) {
+        signupPasswordField.addEventListener('input', (e) => {
+            const password = e.target.value;
+            
+            // Update length requirement
+            const hasLength = password.length >= 8;
+            updatePasswordRequirement('signup-req-length', hasLength, 'Au moins 8 caractères');
+            
+            // Update uppercase requirement
+            const hasUpper = /[A-Z]/.test(password);
+            updatePasswordRequirement('signup-req-upper', hasUpper, 'Une majuscule (A-Z)');
+            
+            // Update lowercase requirement
+            const hasLower = /[a-z]/.test(password);
+            updatePasswordRequirement('signup-req-lower', hasLower, 'Une minuscule (a-z)');
+            
+            // Update number requirement
+            const hasNumber = /[0-9]/.test(password);
+            updatePasswordRequirement('signup-req-number', hasNumber, 'Un chiffre (0-9)');
+            
+            // Update special character requirement
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            updatePasswordRequirement('signup-req-special', hasSpecial, 'Un caractère spécial (!@#$%^&*)');
+
+            // Hide error message when typing
+            const errorDiv = document.getElementById('signup-error');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        });
+    }
+
     // Close modal when clicking outside
     const authModal = document.getElementById('auth-modal');
     if (authModal) {
@@ -993,16 +1027,40 @@ function setupEventListeners() {
 }
 
 // Handle login submit from modal
+// Global variable to track login blocking
+let loginBlockedUntil = null;
+
+// Update password requirement display
+function updatePasswordRequirement(elementId, isMet, text) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = isMet ? `✅ ${text}` : `❌ ${text}`;
+        element.style.color = isMet ? '#4caf50' : '#999';
+    }
+}
+
 async function handleLoginSubmit() {
     const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
     const errorDiv = document.getElementById('login-error');
+    const loginBtn = document.getElementById('login-btn');
 
     if (!username || !password) {
         if (errorDiv) {
             errorDiv.textContent = 'Veuillez remplir tous les champs';
             errorDiv.style.display = 'block';
         }
+        return;
+    }
+
+    // Vérifier si l'utilisateur est bloqué
+    if (loginBlockedUntil && Date.now() < loginBlockedUntil) {
+        const remainingSeconds = Math.ceil((loginBlockedUntil - Date.now()) / 1000);
+        if (errorDiv) {
+            errorDiv.textContent = `🔒 Trop de tentatives. Réessayez dans ${remainingSeconds}s`;
+            errorDiv.style.display = 'block';
+        }
+        if (loginBtn) loginBtn.disabled = true;
         return;
     }
 
@@ -1013,13 +1071,54 @@ async function handleLoginSubmit() {
             body: JSON.stringify({ username, password })
         });
 
+        console.log('Login response status:', response.status);
+
         if (response.ok) {
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
             window.location.href = '/';
         } else {
             const data = await response.json();
-            if (errorDiv) {
-                errorDiv.textContent = data.error || 'Identifiants incorrects';
-                errorDiv.style.display = 'block';
+            console.log('Login error:', data);
+
+            // Vérifier si c'est un rate limiting
+            if (response.status === 429 || (data.error && data.error.includes('Trop'))) {
+                loginBlockedUntil = Date.now() + 30000; // 30 secondes
+                if (loginBtn) loginBtn.disabled = true;
+                if (errorDiv) {
+                    errorDiv.textContent = `🔒 ${data.error}`;
+                    errorDiv.style.display = 'block';
+                }
+
+                // Timer countdown
+                const timer = setInterval(() => {
+                    if (!loginBlockedUntil) {
+                        clearInterval(timer);
+                        return;
+                    }
+                    const remaining = Math.ceil((loginBlockedUntil - Date.now()) / 1000);
+                    if (remaining > 0) {
+                        if (errorDiv) {
+                            errorDiv.textContent = `🔒 Trop de tentatives. Réessayez dans ${remaining}s`;
+                            errorDiv.style.display = 'block';
+                        }
+                    } else {
+                        clearInterval(timer);
+                        loginBlockedUntil = null;
+                        if (errorDiv) {
+                            errorDiv.style.display = 'none';
+                            errorDiv.textContent = '';
+                        }
+                        if (loginBtn) loginBtn.disabled = false;
+                    }
+                }, 1000);
+            } else {
+                // Erreur d'identifiants normaux
+                if (errorDiv) {
+                    errorDiv.textContent = data.error || 'Identifiants incorrects';
+                    errorDiv.style.display = 'block';
+                }
             }
         }
     } catch (error) {
@@ -1048,31 +1147,46 @@ async function handleSignupSubmit() {
 
     if (password !== passwordConfirm) {
         if (errorDiv) {
-            errorDiv.textContent = 'Les mots de passe ne correspondent pas';
+            errorDiv.textContent = '❌ Les mots de passe ne correspondent pas';
             errorDiv.style.display = 'block';
         }
         return;
     }
 
-    if (password.length < 6) {
+    // Valider les exigences strictes
+    const errors = [];
+    if (password.length < 8) errors.push('Au moins 8 caractères');
+    if (!/[A-Z]/.test(password)) errors.push('Une majuscule (A-Z)');
+    if (!/[a-z]/.test(password)) errors.push('Une minuscule (a-z)');
+    if (!/[0-9]/.test(password)) errors.push('Un chiffre (0-9)');
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) errors.push('Un caractère spécial (!@#$%^&*)');
+
+    if (errors.length > 0) {
         if (errorDiv) {
-            errorDiv.textContent = 'Le mot de passe doit contenir au moins 6 caractères';
+            errorDiv.textContent = '❌ Exigences non satisfaites: ' + errors.join(', ');
             errorDiv.style.display = 'block';
         }
         return;
     }
 
     try {
+        console.log('Sending signup request for:', username);
         const response = await fetch('/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
 
+        console.log('Signup response status:', response.status);
+        const data = await response.json();
+        console.log('Signup response:', data);
+
         if (response.ok) {
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
             window.location.href = '/';
         } else {
-            const data = await response.json();
             if (errorDiv) {
                 errorDiv.textContent = data.error || 'Erreur lors de l\'inscription';
                 errorDiv.style.display = 'block';

@@ -59,6 +59,8 @@
                         <h2>Login</h2>
                         <input type="text" id="login-username" placeholder="Username" required>
                         <input type="password" id="login-password" placeholder="Password" required>
+                        <!-- Error message -->
+                        <div id="login-error" style="background-color: #ffebee; color: #d32f2f; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: none; font-weight: bold; text-align: center;"></div>
                         <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;">Login</button>
                         <p style="text-align: center; margin-top: 10px; font-size: 14px;">
                             No account? <button id="switch-to-signup" class="link-btn">Sign Up</button>
@@ -71,6 +73,17 @@
                         <input type="text" id="signup-username" placeholder="Username" required>
                         <input type="password" id="signup-password" placeholder="Password" required>
                         <input type="password" id="signup-password-confirm" placeholder="Confirm Password" required>
+                        <!-- Password requirements -->
+                        <div id="password-requirements" style="margin-top: 15px; margin-bottom: 15px; font-size: 12px; color: #666;">
+                            <p style="font-weight: bold; margin-bottom: 8px;">Password Requirements:</p>
+                            <div id="signup-req-length" style="margin: 3px 0; color: #999;">❌ At least 8 characters</div>
+                            <div id="signup-req-upper" style="margin: 3px 0; color: #999;">❌ One uppercase (A-Z)</div>
+                            <div id="signup-req-lower" style="margin: 3px 0; color: #999;">❌ One lowercase (a-z)</div>
+                            <div id="signup-req-number" style="margin: 3px 0; color: #999;">❌ One number (0-9)</div>
+                            <div id="signup-req-special" style="margin: 3px 0; color: #999;">❌ One special character (!@#$%^&*)</div>
+                        </div>
+                        <!-- Error message -->
+                        <div id="signup-error" style="background-color: #ffebee; color: #d32f2f; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: none; font-weight: bold; text-align: center;"></div>
                         <button id="signup-submit-btn" class="btn btn-primary" style="width: 100%;">Sign Up</button>
                         <p style="text-align: center; margin-top: 10px; font-size: 14px;">
                             Already have an account? <button id="switch-to-login" class="link-btn">Login</button>
