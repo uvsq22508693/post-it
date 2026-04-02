@@ -7,6 +7,7 @@ const { checkLoginAttempts } = require('../middleware/rateLimiter');
 router.get('/login', AuthController.showLoginPage);
 
 // Routes API
+router.get('/me', AuthController.getCurrentUser);
 router.post('/signup', AuthController.signup);
 router.post('/login', checkLoginAttempts, AuthController.login);  // ← Rate limiting ici!
 router.post('/logout', AuthController.logout);

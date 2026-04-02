@@ -1,6 +1,7 @@
 // Global variables
 let currentUserId = null;
 let currentUsername = null;
+let currentUserColor = null;
 let currentRole = null;
 let postits = [];
 let selectedX = null;
@@ -31,6 +32,18 @@ function getRandomColor() {
     return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
+// Get color for a username (for creating new notes)
+function getUserColorByUsername(username) {
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) {
+        const char = username.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    const colorIndex = Math.abs(hash) % USER_COLORS.length;
+    return USER_COLORS[colorIndex];
+}
+
 // Get user color (from database or fallback to hash)
 function getUserColor(post) {
     // If the post has a stored user_color, use it
@@ -40,18 +53,11 @@ function getUserColor(post) {
     
     // Fallback: hash username for color (for backward compatibility)
     const username = post.username || '';
-    let hash = 0;
-    for (let i = 0; i < username.length; i++) {
-        const char = username.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    const colorIndex = Math.abs(hash) % USER_COLORS.length;
-    return USER_COLORS[colorIndex];
+    return getUserColorByUsername(username);
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Get user info from page
     const authNav = document.getElementById('auth-nav');
     if (authNav) {
@@ -63,6 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (match) {
                 currentUsername = match[1];
                 currentUserId = true;
+                
+                // Fetch current user's color from backend
+                try {
+                    const response = await fetch('/me');
+                    if (response.ok) {
+                        const user = await response.json();
+                        currentUserColor = user.user_color;
+                        
+                        // Apply user color to the Add Note button
+                        const addNoteBtn = document.getElementById('add-note-btn');
+                        if (addNoteBtn && currentUserColor) {
+                            addNoteBtn.setAttribute('style', `background: ${currentUserColor} !important;`);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch user color:', error);
+                }
             }
         }
     }
@@ -191,7 +214,12 @@ function createPostElement(post) {
     
     // Add user-specific color based on stored user_color
     const userColor = getUserColor(post);
-    postElement.classList.add(userColor);
+    // If it's a hex color, apply as inline style; otherwise add as class
+    if (userColor && userColor.startsWith('#')) {
+        postElement.style.backgroundColor = userColor;
+    } else {
+        postElement.classList.add(userColor);
+    }
     
     // Check if this postit belongs to current user
     const isOwn = currentUsername === post.username;
@@ -216,21 +244,12 @@ function createPostElement(post) {
             <div class="postit-date" style="color: #333 !important; text-shadow: 0 0 0 #333;">Date: ${formattedDate}</div>
         </div>
         <div class="postit-controls">
-            <button class="postit-btn postit-link" title="Connect">🔗</button>
             <button class="postit-btn postit-edit" title="Edit">✏️</button>
             <button class="postit-btn postit-delete" data-id="${post.id}" title="Supprimer">×</button>
         </div>
     `;
 
     // Add event listeners
-    const linkBtn = postElement.querySelector('.postit-link');
-    if (linkBtn) {
-        linkBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            startConnection(e);
-        });
-    }
-    
     const editBtn = postElement.querySelector('.postit-edit');
     if (editBtn) {
         editBtn.addEventListener('click', () => handleEditPostit(post.id, post.text));
@@ -307,6 +326,9 @@ function makeDraggable(element, postId) {
         isDragging = true;
         element.classList.add('dragging');
         
+        // Bring to front
+        element.style.zIndex = 10000;
+        
         dragStartX = e.clientX;
         dragStartY = e.clientY;
         elementStartX = parseInt(element.style.left) || 0;
@@ -324,12 +346,13 @@ function makeDraggable(element, postId) {
 // Open create modal as zoomed note
 function openCreateModalAsZoomedNote() {
     const container = document.getElementById('postits-container');
-    const userColor = getUserColor(currentUsername || 'user');
+    const userColor = currentUserColor || getUserColorByUsername(currentUsername || 'user');
     
     // Create temporary note element
     const tempNote = document.createElement('div');
     tempNote.id = 'temp-create-note';
-    tempNote.className = `postit ${userColor}`;
+    tempNote.className = 'postit';
+    tempNote.style.backgroundColor = userColor;
     tempNote.style.position = 'fixed';
     tempNote.style.width = '280px';
     tempNote.style.height = '200px';
