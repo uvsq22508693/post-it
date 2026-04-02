@@ -1,6 +1,7 @@
 // Global variables
 let currentUserId = null;
 let currentUsername = null;
+let currentUserColor = null;
 let currentRole = null;
 let postits = [];
 let selectedX = null;
@@ -8,8 +9,14 @@ let selectedY = null;
 let connections = []; // Store node connections
 let selectedPostForConnection = null; // Track which note is selected for connection
 
-// User color assignment
-const USER_COLORS = ['user-color-0', 'user-color-1', 'user-color-2', 'user-color-3', 'user-color-4', 'user-color-5', 'user-color-6', 'user-color-7', 'user-color-8', 'user-color-9', 'user-color-10', 'user-color-11'];
+// User color assignment (expanded palette - 20 colors)
+const USER_COLORS = [
+    'user-color-0', 'user-color-1', 'user-color-2', 'user-color-3', 
+    'user-color-4', 'user-color-5', 'user-color-6', 'user-color-7', 
+    'user-color-8', 'user-color-9', 'user-color-10', 'user-color-11',
+    'user-color-12', 'user-color-13', 'user-color-14', 'user-color-15',
+    'user-color-16', 'user-color-17', 'user-color-18', 'user-color-19'
+];
 
 // Canvas panning variables
 let isPanning = false;
@@ -25,20 +32,32 @@ function getRandomColor() {
     return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-// Hash username to get consistent user color
-function getUserColor(username) {
+// Get color for a username (for creating new notes)
+function getUserColorByUsername(username) {
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
         const char = username.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
+        hash = hash & hash;
     }
     const colorIndex = Math.abs(hash) % USER_COLORS.length;
     return USER_COLORS[colorIndex];
 }
 
+// Get user color (from database or fallback to hash)
+function getUserColor(post) {
+    // If the post has a stored user_color, use it
+    if (post.user_color) {
+        return post.user_color;
+    }
+    
+    // Fallback: hash username for color (for backward compatibility)
+    const username = post.username || '';
+    return getUserColorByUsername(username);
+}
+
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Get user info from page
     const authNav = document.getElementById('auth-nav');
     if (authNav) {
@@ -50,6 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (match) {
                 currentUsername = match[1];
                 currentUserId = true;
+                
+                // Fetch current user's color from backend
+                try {
+                    const response = await fetch('/me');
+                    if (response.ok) {
+                        const user = await response.json();
+                        currentUserColor = user.user_color;
+                        
+                        // Apply user color to the Add Note button
+                        const addNoteBtn = document.getElementById('add-note-btn');
+                        if (addNoteBtn && currentUserColor) {
+                            addNoteBtn.setAttribute('style', `background: ${currentUserColor} !important;`);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch user color:', error);
+                }
             }
         }
     }
@@ -176,9 +212,14 @@ function createPostElement(post) {
     postElement.className = 'postit';
     postElement.setAttribute('data-postit-id', post.id);
     
-    // Add user-specific color based on username hash
-    const userColor = getUserColor(post.username);
-    postElement.classList.add(userColor);
+    // Add user-specific color based on stored user_color
+    const userColor = getUserColor(post);
+    // If it's a hex color, apply as inline style; otherwise add as class
+    if (userColor && userColor.startsWith('#')) {
+        postElement.style.backgroundColor = userColor;
+    } else {
+        postElement.classList.add(userColor);
+    }
     
     // Check if this postit belongs to current user
     const isOwn = currentUsername === post.username;
@@ -203,21 +244,12 @@ function createPostElement(post) {
             <div class="postit-date" style="color: #333 !important; text-shadow: 0 0 0 #333;">Date: ${formattedDate}</div>
         </div>
         <div class="postit-controls">
-            <button class="postit-btn postit-link" title="Connect">🔗</button>
             <button class="postit-btn postit-edit" title="Edit">✏️</button>
             <button class="postit-btn postit-delete" data-id="${post.id}" title="Supprimer">×</button>
         </div>
     `;
 
     // Add event listeners
-    const linkBtn = postElement.querySelector('.postit-link');
-    if (linkBtn) {
-        linkBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            startConnection(e);
-        });
-    }
-    
     const editBtn = postElement.querySelector('.postit-edit');
     if (editBtn) {
         editBtn.addEventListener('click', () => handleEditPostit(post.id, post.text));
@@ -294,6 +326,9 @@ function makeDraggable(element, postId) {
         isDragging = true;
         element.classList.add('dragging');
         
+        // Bring to front
+        element.style.zIndex = 10000;
+        
         dragStartX = e.clientX;
         dragStartY = e.clientY;
         elementStartX = parseInt(element.style.left) || 0;
@@ -311,12 +346,13 @@ function makeDraggable(element, postId) {
 // Open create modal as zoomed note
 function openCreateModalAsZoomedNote() {
     const container = document.getElementById('postits-container');
-    const userColor = getUserColor(currentUsername || 'user');
+    const userColor = currentUserColor || getUserColorByUsername(currentUsername || 'user');
     
     // Create temporary note element
     const tempNote = document.createElement('div');
     tempNote.id = 'temp-create-note';
-    tempNote.className = `postit ${userColor}`;
+    tempNote.className = 'postit';
+    tempNote.style.backgroundColor = userColor;
     tempNote.style.position = 'fixed';
     tempNote.style.width = '280px';
     tempNote.style.height = '200px';

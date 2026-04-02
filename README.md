@@ -96,3 +96,48 @@ L'application est bâtie sur:
 - **CSS3**: Animations et styling
 - **SVG**: Lignes de connexion
 https://post-it-b46y.onrender.com/
+
+---
+
+## 📝 Changelog
+
+### 📅 Mise à jour - 2 Avril 2026 (15:46)
+
+#### ✅ Corrections et Améliorations
+
+1. **Intégration PostgreSQL**
+   - Migration de SQLite vers PostgreSQL
+   - Configuration de la connexion à la base de données
+   - Initialisation des tables avec le schéma PostgreSQL
+
+2. **Système de couleurs utilisateur**
+   - Chaque utilisateur reçoit une couleur unique basée sur le hash de son nom d'utilisateur
+   - Les couleurs sont persistées en base de données dans la colonne `user_color`
+   - Ajout du endpoint `/me` pour récupérer les infos de l'utilisateur courant
+   - Assignation automatique des couleurs lors de l'inscription
+
+3. **Interface utilisateur - Couleurs**
+   - Le bouton "+ Add Note" affiche la couleur de l'utilisateur
+   - Les nouveaux post-its popup avec la couleur de l'utilisateur
+   - Correction de l'application des couleurs hex en inline styles CSS
+   - Ajout de style.backgroundColor pour les notes de couleur cohérente
+
+4. **Gestion du drag & drop**
+   - Les utilisateurs peuvent uniquement déplacer leurs propres notes
+   - Les notes déplacées se mettent en avant (z-index = 10000)
+
+5. **Suppression de la fonctionnalité de connexion**
+   - Suppression du bouton 🔗 "Connecter" les notes entre elles
+
+#### 🔧 Détails techniques
+- Ajout du helper `getColorForUser()` dans UserModel
+- Utilisation d'une palette de 20 couleurs pour les utilisateurs
+- Implémentation du `getCurrentUser()` dans AuthController
+- Correction du fetch vers `/me` au lieu de `/auth/me`
+
+#### 🚀 État actuel
+- ✅ Application fonctionnelle avec PostgreSQL
+- ✅ Chaque utilisateur a sa propre couleur
+- ✅ UI cohérente avec couleurs utilisateur
+- ✅ Drag & drop sécurisé (propriétaire uniquement)
+- ✅ Toutes les modifications persistées en base de données

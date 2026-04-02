@@ -335,6 +335,7 @@ header h1 {
     min-height: 200px;
     padding: 12px;
     border-radius: 4px;
+    background-color: #FFD700;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
     font-size: 13px;
     line-height: 1.4;
@@ -401,6 +402,14 @@ header h1 {
 .postit.user-color-9 { background-color: #A9FFD4; } /* Light Green */
 .postit.user-color-10 { background-color: #FFF4A9; } /* Pale Yellow */
 .postit.user-color-11 { background-color: #FFB3D9; } /* Hot Pink */
+.postit.user-color-12 { background-color: #C5B3FF; } /* Periwinkle */
+.postit.user-color-13 { background-color: #FFCCA3; } /* Apricot */
+.postit.user-color-14 { background-color: #A3E4D7; } /* Aquamarine */
+.postit.user-color-15 { background-color: #F7DC6F; } /* Bright Yellow */
+.postit.user-color-16 { background-color: #F8BBD0; } /* Light Pink */
+.postit.user-color-17 { background-color: #B2DFDB; } /* Pale Teal */
+.postit.user-color-18 { background-color: #E1BEE7; } /* Pale Purple */
+.postit.user-color-19 { background-color: #C8E6C9; } /* Pale Green */
 
 .postit-text {
     word-wrap: break-word;

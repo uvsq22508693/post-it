@@ -71,6 +71,26 @@ class AuthController {
         }
     }
     
+    // Get current user info
+    static async getCurrentUser(req, res) {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Non authentifié' });
+        }
+        
+        try {
+            const user = await UserModel.findById(req.session.userId);
+            res.json({
+                id: user.id,
+                username: user.username,
+                role: user.role,
+                user_color: user.user_color
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Erreur' });
+        }
+    }
+    
     // Déconnexion
     static logout(req, res) {
         req.session.destroy();
