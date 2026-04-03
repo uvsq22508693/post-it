@@ -493,8 +493,7 @@ function handleDoubleClick(e) {
     const isLoggedIn = authNav && (authNav.innerHTML.includes('welcome') || authNav.innerHTML.includes('Welcome'));
 
     if (!isLoggedIn) {
-        alert('Please login to create a note');
-        openAuthModal();
+        openGuestModal();
         return;
     }
 
@@ -874,27 +873,41 @@ function openAuthModal() {
     document.getElementById('signup-form').classList.add('hidden');
 }
 
+// Open guest post modal
+function openGuestModal() {
+    document.getElementById('guest-post-modal').classList.remove('hidden');
+}
+
+// Close guest post modal
+function closeGuestModal() {
+    document.getElementById('guest-post-modal').classList.add('hidden');
+}
+
 // Setup all event listeners
 function setupEventListeners() {
     // Add Note button
     const addNoteBtn = document.getElementById('add-note-btn');
     if (addNoteBtn) {
         addNoteBtn.addEventListener('click', () => {
-            const authNav = document.getElementById('auth-nav');
-            const isLoggedIn = authNav && (authNav.innerHTML.includes('welcome') || authNav.innerHTML.includes('Welcome'));
-
-            if (!isLoggedIn) {
-                alert('Please login to create a note');
-                openAuthModal();
-                return;
-            }
-
             const container = document.getElementById('postits-container');
             // Place note at center of current viewport + scroll offset
             selectedX = container.scrollLeft + (container.clientWidth / 2);
             selectedY = container.scrollTop + (container.clientHeight / 2);
             
             openCreateModal();
+        });
+    }
+
+    // Guest mode login/signup links
+    const loginLink = document.getElementById('login-link');
+    if (loginLink) {
+        loginLink.addEventListener('click', openAuthModal);
+    }
+
+    const signupLink = document.getElementById('signup-link');
+    if (signupLink) {
+        signupLink.addEventListener('click', () => {
+            openAuthModal(true); // true = show signup tab
         });
     }
 
@@ -1057,6 +1070,44 @@ function setupEventListeners() {
         createModal.addEventListener('click', (e) => {
             if (e.target === createModal) {
                 createModal.classList.add('hidden');
+            }
+        });
+    }
+
+    // Guest post modal listeners
+    const guestLoginBtn = document.getElementById('guest-login-btn');
+    if (guestLoginBtn) {
+        guestLoginBtn.addEventListener('click', () => {
+            closeGuestModal();
+            openAuthModal();
+        });
+    }
+
+    const guestSignupBtn = document.getElementById('guest-signup-btn');
+    if (guestSignupBtn) {
+        guestSignupBtn.addEventListener('click', () => {
+            closeGuestModal();
+            openAuthModal();
+            setTimeout(() => {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('signup-form').classList.remove('hidden');
+            }, 100);
+        });
+    }
+
+    const guestCloseBtn = document.getElementById('guest-close-btn');
+    if (guestCloseBtn) {
+        guestCloseBtn.addEventListener('click', () => {
+            closeGuestModal();
+        });
+    }
+
+    // Close guest modal when clicking outside
+    const guestModal = document.getElementById('guest-post-modal');
+    if (guestModal) {
+        guestModal.addEventListener('click', (e) => {
+            if (e.target === guestModal) {
+                closeGuestModal();
             }
         });
     }

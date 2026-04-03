@@ -18,6 +18,7 @@
                 <span class="welcome-msg">Welcome back, {{ username }}!</span>
                 <button id="logout-btn" class="btn btn-logout">Logout</button>
             {% else %}
+                <span class="guest-msg">👤 Hello guest, you can view notes</span>
                 <button id="login-btn" class="btn btn-login">Login</button>
                 <button id="signup-btn" class="btn btn-signup">Sign Up</button>
             {% endif %}
@@ -37,6 +38,31 @@
             <div class="modal-buttons">
                 <button id="save-postit-btn" class="btn btn-success">Create</button>
                 <button id="cancel-postit-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour non-loggé essayant de poster -->
+    <div id="guest-post-modal" class="modal hidden">
+        <div class="modal-content auth-modal-content">
+            <div class="auth-modal-wrapper">
+                <!-- Left side: Picture -->
+                <div class="auth-modal-image">
+                    <div class="image-placeholder">
+                        <span>📝</span>
+                    </div>
+                </div>
+
+                <!-- Right side: Message and Buttons -->
+                <div class="auth-modal-form">
+                    <h2>Post a Note</h2>
+                    <p style="font-size: 16px; margin-bottom: 20px; line-height: 1.5; color: white;">
+                        To post a note you must login to your account or create one
+                    </p>
+                    <button id="guest-login-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">Login</button>
+                    <button id="guest-signup-btn" class="btn btn-success" style="width: 100%; margin-bottom: 10px;">Sign Up</button>
+                    <button id="guest-close-btn" class="btn btn-secondary" style="width: 100%;">Close</button>
+                </div>
             </div>
         </div>
     </div>

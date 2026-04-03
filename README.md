@@ -141,3 +141,35 @@ https://post-it-b46y.onrender.com/
 - ✅ UI cohérente avec couleurs utilisateur
 - ✅ Drag & drop sécurisé (propriétaire uniquement)
 - ✅ Toutes les modifications persistées en base de données
+
+### 📅 Mise à jour - 3 Avril 2026
+
+#### ✅ Mode Invité avec Modal
+
+1. **Expérience Invité améliorée**
+   - Les utilisateurs non connectés voient "👤 Hello guest, you can view notes" en haut de la page
+   - Les invités peuvent consulter toutes les notes existantes
+   - Double-clic tentant de créer une note affiche une modal au lieu d'une alerte
+
+2. **Modal de Post pour Invités**
+   - Design cohérent avec la modal d'authentification (image + message + boutons)
+   - Message explicite: "To post a note you must login to your account or create one"
+   - 3 boutons: Login, Sign Up, Close
+   - Fermeture par clic sur le bouton Close ou en cliquant en dehors de la modal
+
+3. **Navigation fluide**
+   - Le bouton "Login" ouvre la modal d'authentification (onglet Login)
+   - Le bouton "Sign Up" ouvre la modal d'authentification (onglet Sign Up)
+   - Tous les boutons fonctionnent correctement sans alerte gênante
+
+#### 🔧 Détails techniques
+- Ajout des fonctions `openGuestModal()` et `closeGuestModal()` dans client.js
+- Event listeners pour tous les boutons de la guest modal
+- Modal se ferme au clic sur le fond/backdrop
+- Double-clic détecte si l'utilisateur est connecté et affiche la modal appropriée
+
+#### 🚀 État actuel
+- ✅ Mode invité complet et fonctionnel
+- ✅ Modal de post pour invités avec design cohérent
+- ✅ Tous les boutons de navigation fonctionnent
+- ✅ Bonne expérience utilisateur pour invités et utilisateurs connectés
