@@ -79,29 +79,96 @@ L'application est bâtie sur:
 - Lignes SVG dessinées dynamiquement
 - Rafraîchissement automatique lors du panning
 
+#### 5. **Panneau d'Administration**
+- **Accès sécurisé**: Route `/admin` réservée aux admins
+- **Tableau complet**: Vue de tous les posts de tous les utilisateurs
+- **Pagination**: 20 posts par page, navigation sans rechargement (fetch dynamique)
+- **Gestion des posts**:
+  - 📝 **Modifier**: Bouton Edit ouvre une modal pour éditer le contenu du post
+  - 🗑️ **Supprimer**: Confirmation avant suppression
+  - 📊 **Informations**: Auteur (avec couleur), date de création visible pour chaque post
+- **Synchronisation en temps réel**: 
+  - Polling toutes les 2 secondes pour détecter les changements
+  - Tous les navigateurs affichant le panel voient les mises à jour automatiquement
+  - Système basé sur fetch API sans rechargement de page
+
 ### Flux utilisateur
 1. L'utilisateur se connecte/s'inscrit
 2. Arrive sur le board avec ses notes existantes
 3. Peut créer/éditer/supprimer/déplacer les notes
 4. Les modifications sont synchronisées en temps réel avec la base de données
 5. Les couleurs sont consistantes par utilisateur
-6. Les connexions entre notes restent visibles lors du panning
+6. **Admin**: Peut accéder à `/admin` pour g gérer tous les posts globalement
+7. **Synchronisation admin**: Le tableau admin se met à jour automatiquement quand des changements sont détectés
 
 ### Technologies utilisées
 - **Node.js & Express**: Serveur web et routage
-- **SQLite3**: Stockage persistant
-- **bcrypt**: Sécurité des mots de passe
-- **EJS**: Rendu des templates HTML
+- **PostgreSQL**: Base de données relationnelle
+- **pg-pool**: Pool de connexions PostgreSQL
+- **bcrypt**: Sécurité des mots de passe (10 tours)
+- **express-session**: Gestion des sessions utilisateur
+- **Nunjucks**: Rendu des templates HTML
+- **Helmet**: Sécurité (Content Security Policy)
 - **Vanilla JavaScript**: Logique client sans framework
-- **CSS3**: Animations et styling
-- **SVG**: Lignes de connexion
-https://post-it-b46y.onrender.com/
+- **CSS3**: Animations et styling responsive
+- **SVG**: Lignes de connexion (fonctionnalité supprimée)
+- **Fetch API**: Communication client-serveur asynchrone
 
 ---
 
 ## 📝 Changelog
 
-### 📅 Mise à jour - 2 Avril 2026 (15:46)
+### 📅 Mise à jour - Admin Panel - Avril 2026
+
+#### ✅ Panneau d'Administration
+
+1. **Route Admin sécurisée (`/admin`)**
+   - Accessible uniquement aux utilisateurs avec le rôle `admin`
+   - Middleware de vérification des droits d'accès
+   - Redirection automatique des non-admins
+
+2. **API de Pagination**
+   - Endpoint `/api/admin/posts?page=X` - Retourne 20 posts par page
+   - Pagination dynamique sans rechargement de page
+   - Informations complètes: ID, contenu, auteur, date, couleur utilisateur
+
+3. **Tableau Interactif**
+   - Affichage de tous les posts de tous les utilisateurs
+   - Colonne d'actions (Modifier/Supprimer) pour chaque post
+   - Auteur affiché avec sa couleur personnalisée
+   - Date de création formatée lisiblement
+
+4. **Gestion des posts par l'admin**
+   - 📝 **Modifier**: Modal d'édition du contenu avec validation
+   - 🗑️ **Supprimer**: Confirmation avant suppression, avec gestion d'erreur
+   - Endpoints API: `PUT /api/admin/posts/:id`, `DELETE /api/admin/posts/:id`
+
+5. **Synchronisation en Temps Réel**
+   - Polling toutes les 2 secondes via `/api/last-update`
+   - Détection automatique des changements
+   - Mise à jour du tableau sur tous les navigateurs connectés
+   - Système basé sur timestamp sans rechargement complet
+
+6. **Interface Utilisateur**
+   - Design responsive et professionnel
+   - Modal d'édition avec confirmation
+   - Messages de succès/erreur
+   - Pagination avec boutons Précédent/Suivant
+   - Indicateur de page et nombre total de posts
+   - Optimisation CSS pour éviter les conflits de scrolling
+
+#### 🔧 Détails techniques
+- Fichier `routes/admin.js` - Gestion des routes admin
+- Fichier `controllers/adminController.js` - Logique métier admin
+- Fichier `public/admin.js` - JavaScript client pour le polling et interactions
+- Fichier `views/admin.njk` - Template du dashboard admin
+- Extensions à `postModel.js`: `findAllPaginated()`, `getTotal()`, `updateForce()`, `deleteForce()`
+- Classe AdminController avec système d'update tracking
+- Content Security Policy compatible (pas de scripts inline)
+
+---
+
+### 📅 Précédentes mises à jour - 2 Avril 2026 (15:46)
 
 #### ✅ Corrections et Améliorations
 
@@ -111,29 +178,16 @@ https://post-it-b46y.onrender.com/
    - Initialisation des tables avec le schéma PostgreSQL
 
 2. **Système de couleurs utilisateur**
-   - Chaque utilisateur reçoit une couleur unique basée sur le hash de son nom d'utilisateur
-   - Les couleurs sont persistées en base de données dans la colonne `user_color`
-   - Ajout du endpoint `/me` pour récupérer les infos de l'utilisateur courant
-   - Assignation automatique des couleurs lors de l'inscription
+   - Chaque utilisateur reçoit une couleur unique
+   - Les couleurs sont persistées en base de données
+   - Assignation automatique lors de l'inscription
 
 3. **Interface utilisateur - Couleurs**
    - Le bouton "+ Add Note" affiche la couleur de l'utilisateur
    - Les nouveaux post-its popup avec la couleur de l'utilisateur
-   - Correction de l'application des couleurs hex en inline styles CSS
-   - Ajout de style.backgroundColor pour les notes de couleur cohérente
 
-4. **Gestion du drag & drop**
-   - Les utilisateurs peuvent uniquement déplacer leurs propres notes
-   - Les notes déplacées se mettent en avant (z-index = 10000)
-
-5. **Suppression de la fonctionnalité de connexion**
+4. **Suppression de la fonctionnalité de connexion**
    - Suppression du bouton 🔗 "Connecter" les notes entre elles
-
-#### 🔧 Détails techniques
-- Ajout du helper `getColorForUser()` dans UserModel
-- Utilisation d'une palette de 20 couleurs pour les utilisateurs
-- Implémentation du `getCurrentUser()` dans AuthController
-- Correction du fetch vers `/me` au lieu de `/auth/me`
 
 #### 🚀 État actuel
 - ✅ Application fonctionnelle avec PostgreSQL
