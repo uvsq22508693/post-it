@@ -102,5 +102,6 @@ class PostModel {
         const result = await run('DELETE FROM postits WHERE id = $1', [id]);
         return result.changes > 0;
     }
+}
 
 module.exports = PostModel;

@@ -7,11 +7,18 @@
 html, body {
     width: 100%;
     height: 100%;
-    overflow: hidden;
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    overflow: hidden;
+}
+
+/* Allow scrolling for admin page */
+body.admin-page {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
 }
 
 /* Header */

@@ -1,11 +1,15 @@
 const PostModel = require('../models/postModel');
 const UserModel = require('../models/userModel');
 
+// Global variable to track last update time
+let lastUpdateTime = new Date();
+
 class AdminController {
     // Page admin (affiche le tableau)
     static async getDashboard(req, res) {
         try {
-            res.render('admin.njk', {
+            // Utilise renderView du middleware
+            res.renderView('admin', {
                 username: req.session.username,
                 userId: req.session.userId
             });
@@ -15,6 +19,19 @@ class AdminController {
         }
     }
 
+    // Get last update timestamp
+    static async getLastUpdate(req, res) {
+        try {
+            res.json({ lastUpdate: lastUpdateTime.getTime() });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    // Mettre à jour le timestamp
+    static updateLastChangeTime() {
+        lastUpdateTime = new Date();
+    }
     // API: Récupérer les posts avec pagination
     static async getPostsWithPagination(req, res) {
         try {
@@ -65,6 +82,9 @@ class AdminController {
                 return res.status(404).json({ error: 'Post-it non trouvé' });
             }
 
+            // Notifier les autres clients
+            AdminController.updateLastChangeTime();
+
             res.json({ success: true, message: 'Post-it modifié' });
         } catch (error) {
             console.error(error);
@@ -83,6 +103,9 @@ class AdminController {
             if (!deleted) {
                 return res.status(404).json({ error: 'Post-it non trouvé' });
             }
+
+            // Notifier les autres clients
+            AdminController.updateLastChangeTime();
 
             res.json({ success: true, message: 'Post-it supprimé' });
         } catch (error) {
