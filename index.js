@@ -3,11 +3,20 @@ const session = require('express-session');
 const helmet = require('helmet');
 const path = require('path');
 const dotenv = require('dotenv');
+const http = require('http');
+const socketIo = require('socket.io');
 const { initDB } = require('./models/db');
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = process.env.PORT || 3000;
 
 // 🔒 Headers de sécurité avec Helmet
@@ -106,9 +115,21 @@ app.post('/test-make-admin/:username', async (req, res) => {
 
 // Initialiser la BDD et démarrer le serveur
 initDB().then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
     });
+    
+    // Socket.io connection handling
+    io.on('connection', (socket) => {
+        console.log(`📱 User connected: ${socket.id}`);
+        
+        socket.on('disconnect', () => {
+            console.log(`📱 User disconnected: ${socket.id}`);
+        });
+    });
+    
+    // Make io available to routes
+    app.locals.io = io;
 }).catch(err => {
     console.error('Erreur au démarrage:', err);
 });
