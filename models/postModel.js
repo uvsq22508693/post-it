@@ -71,6 +71,36 @@ class PostModel {
         const result = await run(query, params);
         return result.changes > 0;
     }
-}
+
+    // Get total count of posts
+    static async getTotal() {
+        return await get('SELECT COUNT(*) as count FROM postits');
+    }
+
+    // Get all posts with pagination
+    static async findAllPaginated(limit, offset) {
+        return await all(`
+            SELECT p.*, u.username, u.user_color
+            FROM postits p 
+            JOIN users u ON p.user_id = u.id 
+            ORDER BY p.created_at DESC
+            LIMIT $1 OFFSET $2
+        `, [limit, offset]);
+    }
+
+    // Update post (admin - force)
+    static async updateForce(id, text) {
+        const result = await run(
+            'UPDATE postits SET text = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [text, id]
+        );
+        return result.changes > 0;
+    }
+
+    // Delete post (admin - force)
+    static async deleteForce(id) {
+        const result = await run('DELETE FROM postits WHERE id = $1', [id]);
+        return result.changes > 0;
+    }
 
 module.exports = PostModel;

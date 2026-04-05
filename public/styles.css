@@ -341,7 +341,7 @@ header h1 {
     background-color: #4a3f3a;
     background-image: 
         linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-        url('/pic/granite-texture.jpg');
+        url('/images/granite-texture.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -718,7 +718,7 @@ header h1 {
     align-items: center;
     border-radius: 12px 0 0 12px;
     overflow: hidden;
-    background-image: url('/pic/man-taking-notes-on-board-260nw-2456130447.jpg');
+    background-image: url('/images/man-taking-notes-on-board-260nw-2456130447.jpg');
     background-size: cover;
     background-position: center;
 }

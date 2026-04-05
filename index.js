@@ -17,7 +17,6 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/pic', express.static(path.join(__dirname, 'pic')));
 
 // Session
 const isProduction = process.env.NODE_ENV === 'production';
@@ -66,11 +65,9 @@ app.use((req, res, next) => {
 // Routes
 const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
-const connectionsRoutes = require('./routes/connections');
 
 app.use('/', authRoutes);
 app.use('/', postsRoutes);
-app.use('/connections', connectionsRoutes);
 
 // Route principale
 app.get('/', (req, res) => {
