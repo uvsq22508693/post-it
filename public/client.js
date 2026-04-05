@@ -8,6 +8,7 @@ let selectedX = null;
 let selectedY = null;
 let connections = []; // Store node connections
 let selectedPostForConnection = null; // Track which note is selected for connection
+let socket = null; // Socket.io connection
 
 // User color assignment (expanded palette - 20 colors)
 const USER_COLORS = [
@@ -112,6 +113,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Setup SVG canvas for connections
         setupSVGCanvas(positsContainer);
     }
+    
+    // Initialize Socket.io for real-time updates
+    setupSocketIO();
 });
 
 // Setup SVG canvas for drawing connections
@@ -1397,3 +1401,91 @@ function escapeHtml(unsafe) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+// Setup Socket.io for real-time updates
+function setupSocketIO() {
+    socket = io();
+    
+    console.log('🔌 Connecting to Socket.io...');
+    
+    // When a new post is created
+    socket.on('postit-created', (newPost) => {
+        console.log('📡 Received: postit-created', newPost);
+        
+        // Add to local postits array if not already present
+        const exists = postits.some(p => p.id === newPost.id);
+        if (!exists) {
+            postits.push(newPost);
+            
+            // Render the new post
+            const container = document.getElementById('postits-container');
+            if (container) {
+                const postElement = createPostElement(newPost);
+                container.appendChild(postElement);
+            }
+        }
+    });
+    
+    // When a post is updated
+    socket.on('postit-updated', (updatedPost) => {
+        console.log('📡 Received: postit-updated', updatedPost);
+        
+        // Find and update the post in the array
+        const postIndex = postits.findIndex(p => p.id === updatedPost.id);
+        if (postIndex !== -1) {
+            postits[postIndex] = updatedPost;
+            
+            // Update the DOM element
+            const postElement = document.querySelector(`[data-postit-id="${updatedPost.id}"]`);
+            if (postElement) {
+                const postText = postElement.querySelector('.postit-text');
+                if (postText) {
+                    postText.textContent = updatedPost.text;
+                }
+            }
+        }
+    });
+    
+    // When a post is deleted
+    socket.on('postit-deleted', (data) => {
+        console.log('📡 Received: postit-deleted', data);
+        
+        // Remove from array
+        postits = postits.filter(p => p.id !== data.id);
+        
+        // Remove from DOM
+        const postElement = document.querySelector(`[data-postit-id="${data.id}"]`);
+        if (postElement) {
+            postElement.remove();
+        }
+    });
+    
+    // When a post is moved
+    socket.on('postit-moved', (data) => {
+        console.log('📡 Received: postit-moved', data);
+        
+        // Update array
+        const post = postits.find(p => p.id === data.id);
+        if (post) {
+            post.x = data.x;
+            post.y = data.y;
+        }
+        
+        // Update DOM
+        const postElement = document.querySelector(`[data-postit-id="${data.id}"]`);
+        if (postElement) {
+            postElement.style.left = data.x + 'px';
+            postElement.style.top = data.y + 'px';
+        }
+    });
+    
+    // Connection events
+    socket.on('connect', () => {
+        console.log('✅ Connected to server');
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('❌ Disconnected from server');
+    });
+}
+

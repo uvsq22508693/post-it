@@ -25,6 +25,13 @@ class PostsController {
             const postId = await PostModel.create(text, x, y, userId);
             const newPost = await PostModel.findById(postId);
             
+            // Emit socket event to all connected clients
+            const io = req.app.locals.io;
+            if (io) {
+                io.emit('postit-created', newPost);
+                console.log('📡 Socket event sent: postit-created');
+            }
+            
             res.status(201).json(newPost);
         } catch (error) {
             console.error(error);
@@ -43,6 +50,13 @@ class PostsController {
             
             if (!deleted) {
                 return res.status(404).json({ error: 'Post-it non trouvé ou non autorisé' });
+            }
+            
+            // Emit socket event to all connected clients
+            const io = req.app.locals.io;
+            if (io) {
+                io.emit('postit-deleted', { id });
+                console.log('📡 Socket event sent: postit-deleted');
             }
             
             res.json({ success: true });
@@ -66,6 +80,14 @@ class PostsController {
                 return res.status(404).json({ error: 'Post-it non trouvé ou non autorisé' });
             }
             
+            // Get updated post and emit socket event
+            const updatedPost = await PostModel.findById(id);
+            const io = req.app.locals.io;
+            if (io) {
+                io.emit('postit-updated', updatedPost);
+                console.log('📡 Socket event sent: postit-updated');
+            }
+            
             res.json({ success: true });
         } catch (error) {
             console.error(error);
@@ -85,6 +107,13 @@ class PostsController {
             
             if (!moved) {
                 return res.status(404).json({ error: 'Post-it non trouvé ou non autorisé' });
+            }
+            
+            // Emit socket event for position change
+            const io = req.app.locals.io;
+            if (io) {
+                io.emit('postit-moved', { id, x, y });
+                console.log('📡 Socket event sent: postit-moved');
             }
             
             res.json({ success: true });
