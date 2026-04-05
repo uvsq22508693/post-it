@@ -173,3 +173,34 @@ https://post-it-b46y.onrender.com/
 - ✅ Modal de post pour invités avec design cohérent
 - ✅ Tous les boutons de navigation fonctionnent
 - ✅ Bonne expérience utilisateur pour invités et utilisateurs connectés
+
+### 📅 Mise à jour - 5 Avril 2026
+
+#### ✅ Mises à jour en temps réel avec Socket.io
+
+1. **Synchronisation multi-navigateurs**
+   - Tous les navigateurs affichant le même tableau voient les changements instantanément
+   - Création d'une note visible partout
+   - Suppression d'une note synchronisée en temps réel
+   - Déplacement/modification d'une note mis à jour immédiatement
+
+2. **Socket.io Server**
+   - Intégration de Socket.io au serveur Express
+   - Gestion des événements: create, update, delete, move
+   - Émission des événements à tous les clients connectés
+
+3. **Socket.io Client**
+   - Écouteurs pour les 4 types d'événements
+   - Mise à jour du DOM sans rechargement
+   - Logs de débogage dans la console
+
+#### 🔧 Détails techniques
+- Installation de `socket.io` (v4.8.1)
+- Création de `http.Server` pour Socket.io
+- Émission des événements dans les contrôleurs (addPost, deletePost, updatePost, movePost)
+- Listeners dans `setupSocketIO()` qui mettent à jour l'UI en temps réel
+
+#### 🚀 État actuel
+- ✅ Synchronisation en temps réel fonctionnelle
+- ✅ Multi-navigateurs synchronisés automatiquement
+- ✅ Tous les changements reflétés instantanément
