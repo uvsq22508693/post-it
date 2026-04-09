@@ -89,30 +89,6 @@ app.get('/', (req, res) => {
     });
 });
 
-// 🔧 ENDPOINT DE DEBUG: Voir tous les users (temporaire - à supprimer après)
-app.get('/test-users', async (req, res) => {
-    try {
-        const { pool } = require('./config/database');
-        const result = await pool.query('SELECT id, username, role FROM users');
-        res.json(result.rows);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// 🔧 ENDPOINT DE DEBUG: Mettre un user en admin (temporaire)
-app.post('/test-make-admin/:username', async (req, res) => {
-    try {
-        const { pool } = require('./config/database');
-        const username = req.params.username;
-        await pool.query("UPDATE users SET role = 'admin' WHERE username = $1", [username]);
-        const result = await pool.query('SELECT id, username, role FROM users WHERE username = $1', [username]);
-        res.json({ success: true, user: result.rows[0] });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Initialiser la BDD et démarrer le serveur
 initDB().then(() => {
     server.listen(PORT, () => {
