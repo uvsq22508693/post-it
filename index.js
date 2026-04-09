@@ -35,7 +35,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: isProduction,  // ✅ true en production, false en local
+        secure: false,  // ✅ true en production, false en local
         httpOnly: true,
         sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24 // 24h
