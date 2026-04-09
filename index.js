@@ -92,7 +92,7 @@ app.get('/', (req, res) => {
 // Initialiser la BDD et démarrer le serveur
 initDB().then(async () => {
     // 👇 AJOUTE CES LIGNES TEMPORAIREMENT
-    const UserModel = require('./models/user');
+    const UserModel = require('./models/userModel');
     const existing = await UserModel.findByUsername('Admin');
     if (!existing) {
         await UserModel.create('Admin', 'Admin2026#', 'admin');
