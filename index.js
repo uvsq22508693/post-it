@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Session
 const isProduction = process.env.NODE_ENV === 'production';
-
+app.set('trust proxy', 1);
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-this', // À changer en production!
     resave: false,
