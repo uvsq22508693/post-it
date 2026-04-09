@@ -90,7 +90,16 @@ app.get('/', (req, res) => {
 });
 
 // Initialiser la BDD et démarrer le serveur
-initDB().then(() => {
+initDB().then(async () => {
+    // 👇 AJOUTE CES LIGNES TEMPORAIREMENT
+    const UserModel = require('./models/user');
+    const existing = await UserModel.findByUsername('Admin');
+    if (!existing) {
+        await UserModel.create('Admin', 'Admin2026#', 'admin');
+        console.log('✅ Admin créé !');
+    }
+    // 👆 SUPPRIME JUSQU'ICI APRÈS DÉPLOIEMENT
+
     server.listen(PORT, () => {
         console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
     });
