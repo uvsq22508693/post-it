@@ -82,6 +82,7 @@ L'application est bâtie sur:
 - **Accès sécurisé**: Route `/admin` réservée aux admins
 - **Tableau complet**: Vue de tous les posts de tous les utilisateurs
 - **Pagination**: 20 posts par page, navigation sans rechargement (fetch dynamique)
+- **Info de connexion pour test**: user : Admin Password : Admin2026#
 - **Gestion des posts**:
   - 📝 **Modifier**: Bouton Edit ouvre une modal pour éditer le contenu du post
   - 🗑️ **Supprimer**: Confirmation avant suppression
@@ -111,7 +112,6 @@ L'application est bâtie sur:
 - **Vanilla JavaScript**: Logique client sans framework
 - **CSS3**: Animations et styling
 - **SVG**: Lignes de connexion
-https://post-it-b46y.onrender.com/
 
 ---
 
@@ -129,7 +129,6 @@ https://post-it-b46y.onrender.com/
 2. **Système de couleurs utilisateur**
    - Chaque utilisateur reçoit une couleur unique basée sur le hash de son nom d'utilisateur
    - Les couleurs sont persistées en base de données dans la colonne `user_color`
-   - Ajout du endpoint `/me` pour récupérer les infos de l'utilisateur courant
    - Assignation automatique des couleurs lors de l'inscription
 
 3. **Interface utilisateur - Couleurs**
