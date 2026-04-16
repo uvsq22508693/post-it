@@ -7,7 +7,7 @@ Projet Post-it Master 1 du module application web et sécurité
 
 ### Prérequis
 - Node.js (v14+) installé sur votre machine
-- SQLite3 (intégré avec `sqlite3` npm package)
+- PostgreSQL
 - Un navigateur web moderne
 
 ### Étapes d'installation
@@ -40,7 +40,6 @@ Projet Post-it Master 1 du module application web et sécurité
 
 ### Résolution des problèmes
 - **Port 3000 déjà utilisé**: Modifier le port dans `index.js`
-- **Erreur SQLite**: Vérifier que le dossier `data/` existe et est accessible en écriture
 - **Module introuvable**: Réexécuter `npm install`
 
 ---
@@ -50,7 +49,7 @@ Projet Post-it Master 1 du module application web et sécurité
 ### Architecture générale
 L'application est bâtie sur:
 - **Backend**: Express.js avec authentification par session
-- **Base de données**: SQLite3 avec tables `users` et `postits`
+- **Base de données**: PostgreSQL avec tables `users` et `postits`
 - **Frontend**: Vanilla JavaScript avec CSS3 et SVG
 - **Authenticat secure**: Hachage bcrypt (10 tours) des mots de passe
 
